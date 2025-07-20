@@ -1,0 +1,944 @@
+<!DOCTYPE html>
+<html lang="zh-HK">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>薪金計算器 | 專業收入計算工具</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Noto+Sans+SC:wght@400;500;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --color-primary: #2563eb;
+      --color-primary-light: #3b82f6;
+      --color-secondary: #f59e0b;
+      --color-accent: #8b5cf6;
+      --color-success: #10b981;
+      --color-warning: #f59e0b;
+      --color-danger: #ef4444;
+      --color-dark: #1a2236;
+      --color-light: #f8fafc;
+    }
+
+    * {
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    body {
+      font-family: 'Inter', 'Noto Sans SC', system-ui, sans-serif;
+      background: linear-gradient(135deg, #f3f4f6 0%, #e5e7eb 100%);
+      color: var(--color-dark);
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    .glass-card {
+      background: rgba(255, 255, 255, 0.75);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border: 1px solid rgba(255, 255, 255, 0.4);
+      box-shadow: 0 15px 35px rgba(0, 0, 0, 0.05);
+      border-radius: 20px;
+    }
+
+    .input-glow:focus {
+      box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.2);
+    }
+
+    .btn-gradient {
+      background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-primary-light) 100%);
+      box-shadow: 0 4px 6px rgba(37, 99, 235, 0.3);
+    }
+
+    .btn-gradient:hover {
+      background: linear-gradient(135deg, var(--color-primary-light) 0%, var(--color-primary) 100%);
+      box-shadow: 0 6px 8px rgba(37, 99, 235, 0.4);
+      transform: translateY(-2px);
+    }
+
+    .animate-fadeIn {
+      animation: fadeIn 0.5s ease-in-out;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .blob {
+      position: absolute;
+      border-radius: 50%;
+      filter: blur(60px);
+      z-index: -1;
+    }
+
+    .blob-1 {
+      width: 400px;
+      height: 400px;
+      background: rgba(59, 130, 246, 0.2);
+      top: -150px;
+      right: -100px;
+    }
+
+    .blob-2 {
+      width: 350px;
+      height: 350px;
+      background: rgba(245, 158, 11, 0.15);
+      bottom: -100px;
+      left: -100px;
+    }
+
+    .blob-3 {
+      width: 250px;
+      height: 250px;
+      background: rgba(139, 92, 246, 0.15);
+      top: 50%;
+      left: 10%;
+    }
+
+    .radio-option {
+      border: 2px solid #e2e8f0;
+      border-radius: 0.75rem;
+      padding: 0.8rem 1rem;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      background: rgba(255, 255, 255, 0.6);
+      transition: all 0.2s;
+    }
+
+    .radio-option:hover {
+      border-color: var(--color-primary-light);
+      background: rgba(37, 99, 235, 0.05);
+    }
+
+    .radio-option.selected {
+      border-color: var(--color-primary);
+      background: rgba(37, 99, 235, 0.1);
+      box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
+    }
+
+    .radio-option.selected .radio-indicator {
+      background: var(--color-primary);
+      border-color: var(--color-primary);
+    }
+
+    .radio-option.selected .radio-indicator::after {
+      content: '';
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      width: 8px;
+      height: 8px;
+      background: white;
+      border-radius: 50%;
+      transform: translate(-50%, -50%);
+    }
+
+    .radio-indicator {
+      width: 18px;
+      height: 18px;
+      border: 2px solid #cbd5e1;
+      border-radius: 50%;
+      margin-right: 0.75rem;
+      position: relative;
+    }
+
+    .result-card {
+      display: flex;
+      align-items: center;
+      padding: 1rem;
+      background: rgba(255, 255, 255, 0.7);
+      border-radius: 0.75rem;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.03);
+      transition: all 0.3s;
+    }
+
+    .result-card:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 10px 15px rgba(0, 0, 0, 0.05);
+    }
+
+    .result-icon {
+      width: 50px;
+      height: 50px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 12px;
+      margin-right: 1rem;
+      flex-shrink: 0;
+      background: rgba(59, 130, 246, 0.1);
+    }
+
+    .result-content {
+      flex-grow: 1;
+    }
+
+    .result-title {
+      font-size: 0.85rem;
+      font-weight: 500;
+      color: #64748b;
+      margin-bottom: 0.2rem;
+    }
+
+    .result-value {
+      font-size: 1.35rem;
+      font-weight: 700;
+      color: var(--color-dark);
+    }
+
+    .result-description {
+      font-size: 0.75rem;
+      color: #94a3b8;
+    }
+
+    .compact-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 0.8rem;
+    }
+
+    .summary-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 0.8rem;
+      margin-top: 1.5rem;
+    }
+
+    .summary-card {
+      padding: 1.2rem;
+      border-radius: 0.75rem;
+      background: rgba(255, 255, 255, 0.7);
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.03);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .summary-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 4px;
+      height: 100%;
+    }
+
+    .summary-title {
+      font-size: 0.9rem;
+      font-weight: 500;
+      color: #64748b;
+      margin-bottom: 0.5rem;
+      display: flex;
+      align-items: center;
+    }
+
+    .summary-value {
+      font-size: 1.8rem;
+      font-weight: 700;
+      margin: 0.3rem 0;
+    }
+
+    .summary-description {
+      font-size: 0.8rem;
+      color: #94a3b8;
+    }
+
+    .total-card {
+      background: linear-gradient(135deg, rgba(37, 99, 235, 0.05) 0%, rgba(245, 158, 11, 0.05) 100%);
+    }
+
+    .total-card::before {
+      background: linear-gradient(to bottom, var(--color-primary), var(--color-secondary));
+    }
+
+    .total-value {
+      color: var(--color-secondary);
+    }
+
+    /* 重新设计的顶部区域 - 极简风格 */
+    .minimal-header {
+      text-align: center;
+      padding: 1.5rem 0;
+      margin-bottom: 1.5rem;
+      position: relative;
+    }
+
+    .minimal-header .logo {
+      width: 60px;
+      height: 60px;
+      margin: 0 auto 0.8rem;
+      background: var(--color-primary);
+      border-radius: 16px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 4px 10px rgba(37, 99, 235, 0.2);
+    }
+
+    .minimal-header .logo i {
+      font-size: 1.6rem;
+      color: white;
+    }
+
+    .minimal-header h1 {
+      font-size: 1.4rem;
+      font-weight: 600;
+      color: var(--color-dark);
+      margin-bottom: 0.3rem;
+      letter-spacing: -0.5px;
+    }
+
+    .minimal-header p {
+      font-size: 0.95rem;
+      color: #64748b;
+      max-width: 500px;
+      margin: 0 auto;
+      line-height: 1.5;
+    }
+
+    /* 设计师弹窗优化 */
+    .designer-animation {
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%) scale(0);
+      background: rgba(255, 255, 255, 0.95);
+      backdrop-filter: blur(20px);
+      border-radius: 20px;
+      padding: 2.5rem;
+      box-shadow: 0 25px 50px rgba(0, 0, 0, 0.2);
+      z-index: 1000;
+      text-align: center;
+      max-width: 90%;
+      width: 380px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      opacity: 0;
+      transition: all 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    }
+
+    .designer-animation.active {
+      transform: translate(-50%, -50%) scale(1);
+      opacity: 1;
+    }
+
+    .designer-icon {
+      width: 100px;
+      height: 100px;
+      background: linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 1.5rem;
+      animation: pulse 2s infinite;
+    }
+
+    @keyframes pulse {
+      0% { transform: scale(1); }
+      50% { transform: scale(1.05); }
+      100% { transform: scale(1); }
+    }
+
+    .designer-icon i {
+      font-size: 3rem;
+      color: white;
+    }
+
+    .designer-name {
+      font-size: 1.8rem;
+      font-weight: 700;
+      background: linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      margin-bottom: 0.3rem;
+    }
+
+    .designer-title {
+      font-size: 1rem;
+      color: #64748b;
+      margin-bottom: 1.2rem;
+      font-weight: 500;
+    }
+
+    .designer-info {
+      width: 100%;
+      text-align: left;
+      margin-bottom: 1.5rem;
+    }
+
+    .info-item {
+      display: flex;
+      align-items: flex-start;
+      margin-bottom: 0.8rem;
+      font-size: 0.9rem;
+    }
+
+    .info-item i {
+      color: var(--color-primary);
+      min-width: 24px;
+      margin-top: 3px;
+    }
+
+    .info-content {
+      flex: 1;
+    }
+
+    .info-label {
+      font-weight: 600;
+      color: var(--color-dark);
+      margin-bottom: 0.1rem;
+    }
+
+    .info-value {
+      color: #64748b;
+      line-height: 1.4;
+    }
+
+    .designer-contact {
+      width: 100%;
+      margin-top: 0.5rem;
+    }
+
+    .contact-btn {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      background: #25D366;
+      color: white;
+      padding: 12px 20px;
+      border-radius: 12px;
+      font-weight: 600;
+      transition: all 0.3s;
+      text-decoration: none;
+      margin-bottom: 0.8rem;
+    }
+
+    .contact-btn:hover {
+      background: #128C7E;
+      transform: translateY(-2px);
+      box-shadow: 0 5px 15px rgba(37, 211, 102, 0.3);
+    }
+
+    .close-btn {
+      position: absolute;
+      top: 20px;
+      right: 20px;
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: rgba(0, 0, 0, 0.05);
+      color: #64748b;
+      cursor: pointer;
+      transition: all 0.3s;
+    }
+
+    .close-btn:hover {
+      background: rgba(239, 68, 68, 0.1);
+      color: var(--color-danger);
+      transform: rotate(90deg);
+    }
+
+    .overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0, 0, 0, 0.5);
+      backdrop-filter: blur(5px);
+      z-index: 999;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.3s ease;
+    }
+
+    .overlay.active {
+      opacity: 1;
+      pointer-events: all;
+    }
+
+    .footer-links {
+      display: flex;
+      justify-content: center;
+      gap: 1.5rem;
+      margin-top: 0.5rem;
+    }
+
+    .footer-link {
+      color: var(--color-primary);
+      text-decoration: none;
+      transition: all 0.3s;
+      position: relative;
+      padding-bottom: 2px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 0.9rem;
+    }
+
+    .footer-link:hover {
+      color: var(--color-primary-light);
+    }
+
+    .footer-link::after {
+      content: '';
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      width: 0;
+      height: 2px;
+      background: var(--color-primary-light);
+      transition: width 0.3s ease;
+    }
+
+    .footer-link:hover::after {
+      width: 100%;
+    }
+
+    /* 新增通知样式 */
+    .notification {
+      position: fixed;
+      bottom: 25px;
+      right: 25px;
+      padding: 15px 20px;
+      border-radius: 12px;
+      box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      z-index: 100;
+      opacity: 0;
+      transform: translateY(20px);
+      transition: all 0.3s ease;
+    }
+
+    .notification.show {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    .notification.success {
+      background: #10B981;
+      color: white;
+    }
+
+    .notification.error {
+      background: #EF4444;
+      color: white;
+    }
+
+    .notification i {
+      font-size: 1.2rem;
+    }
+  </style>
+</head>
+<body class="min-h-screen">
+  <div class="relative overflow-hidden">
+    <!-- Background blobs -->
+    <div class="blob blob-1"></div>
+    <div class="blob blob-2"></div>
+    <div class="blob blob-3"></div>
+
+    <div class="container mx-auto px-4 py-8 max-w-4xl relative z-10">
+      <!-- 极简风格顶部区域 -->
+      <header class="minimal-header animate-fadeIn">
+        <div class="logo">
+          <i class="fas fa-calculator"></i>
+        </div>
+        <h1>薪金計算工具</h1>
+        <p>快速精確計算您的工資收入，包含加班費計算</p>
+      </header>
+
+      <!-- 计算表单 -->
+      <section class="glass-card rounded-xl p-5 mb-8">
+        <h2 class="text-xl font-bold text-gray-800 mb-5 flex items-center">
+          <i class="fas fa-calculator text-primary mr-2"></i>工資計算
+        </h2>
+
+        <form id="salaryForm" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+          <!-- 日薪输入 -->
+          <div class="form-group">
+            <label for="dailySalary" class="block text-sm font-medium text-gray-700 mb-2">
+              <i class="fas fa-dollar-sign mr-1 text-gray-500"></i>日薪 (HK$)
+            </label>
+            <div class="relative">
+              <span class="absolute inset-y-0 left-0 flex items-center pl-1 text-gray-500">HK$</span>
+              <input
+                type="number"
+                id="dailySalary"
+                class="w-full pl-10 pr-4 py-2.5 border border-gray-200 rounded-lg input-glow focus:ring-0 focus:border-primary"
+                min="0"
+                step="0.1"
+                placeholder="輸入每日薪金"
+                required
+              >
+            </div>
+          </div>
+
+          <!-- 上班日数输入 -->
+          <div class="form-group">
+            <label for="days" class="block text-sm font-medium text-gray-700 mb-2">
+              <i class="fas fa-calendar-day mr-1 text-gray-500"></i>上班日數
+            </label>
+            <input
+              type="number"
+              id="days"
+              class="w-full px-4 py-2.5 border border-gray-200 rounded-lg input-glow focus:ring-0 focus:border-primary"
+              min="0"
+              step="0.5"
+              placeholder="輸入工作天數"
+              required
+            >
+          </div>
+
+          <!-- 加班小时输入 -->
+          <div class="form-group">
+            <label for="otHours" class="block text-sm font-medium text-gray-700 mb-2">
+              <i class="fas fa-clock mr-1 text-gray-500"></i>加班小時
+            </label>
+            <input
+              type="number"
+              id="otHours"
+              class="w-full px-4 py-2.5 border border-gray-200 rounded-lg input-glow focus:ring-0 focus:border-primary"
+              min="0"
+              step="0.5"
+              placeholder="輸入加班時數"
+              required
+            >
+          </div>
+
+          <!-- 加班倍数选择 -->
+          <div class="form-group lg:col-span-2">
+            <label class="block text-sm font-medium text-gray-700 mb-2">
+              <i class="fas fa-percentage mr-1 text-gray-500"></i>加班倍數
+            </label>
+            <div class="flex flex-wrap gap-3">
+              <label class="radio-option">
+                <div class="radio-indicator"></div>
+                <input type="radio" name="otMultiplier" value="1.5" class="hidden">
+                <span>1.5倍加班</span>
+              </label>
+              <label class="radio-option selected">
+                <div class="radio-indicator"></div>
+                <input type="radio" name="otMultiplier" value="2" class="hidden" checked>
+                <span>2倍加班（標準）</span>
+              </label>
+            </div>
+          </div>
+
+          <!-- 计算按钮 -->
+          <div class="lg:col-span-3 flex justify-center mt-2">
+            <button
+              type="submit"
+              class="btn-gradient text-white font-semibold py-2.5 px-7 rounded-lg shadow-md flex items-center justify-center"
+            >
+              <i class="fas fa-calculator mr-2"></i>計算總工資
+            </button>
+          </div>
+        </form>
+      </section>
+
+      <!-- 计算结果 -->
+      <section id="resultSection" class="glass-card rounded-xl p-5 mb-8 animate-fadeIn hidden">
+        <div class="flex justify-between items-center mb-4">
+          <h2 class="text-xl font-bold text-gray-800 flex items-center">
+            <i class="fas fa-file-invoice-dollar text-secondary mr-2"></i>工資明細
+          </h2>
+          <div class="text-sm text-gray-500">
+            計算結果最多顯示5位小數
+          </div>
+        </div>
+
+        <!-- 顶部结果卡片 -->
+        <div class="compact-grid mb-5">
+          <div class="result-card">
+            <div class="result-icon bg-blue-100 text-blue-600">
+              <i class="fas fa-sun"></i>
+            </div>
+            <div class="result-content">
+              <div class="result-title">日薪</div>
+              <div id="displayDailySalary" class="result-value">HK$ -</div>
+              <div class="result-description">標準工作日工資</div>
+            </div>
+          </div>
+
+          <div class="result-card">
+            <div class="result-icon bg-blue-100 text-blue-600">
+              <i class="fas fa-clock"></i>
+            </div>
+            <div class="result-content">
+              <div class="result-title">正常時薪</div>
+              <div id="hourlySalary" class="result-value">HK$ -</div>
+              <div class="result-description">日薪 ÷ 8小時</div>
+            </div>
+          </div>
+
+          <div class="result-card">
+            <div class="result-icon bg-green-100 text-green-600">
+              <i class="fas fa-bolt"></i>
+            </div>
+            <div class="result-content">
+              <div class="result-title">加班倍數</div>
+              <div id="displayOtMultiplier" class="result-value">×-</div>
+              <div class="result-description">加班工資計算倍數</div>
+            </div>
+          </div>
+
+          <div class="result-card">
+            <div class="result-icon bg-purple-100 text-purple-600">
+              <i class="fas fa-stopwatch"></i>
+            </div>
+            <div class="result-content">
+              <div class="result-title">加班時薪</div>
+              <div id="otHourlySalary" class="result-value">HK$ -</div>
+              <div class="result-description">正常時薪 × 倍數</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 底部总结卡片 -->
+        <div class="summary-grid">
+          <div class="summary-card">
+            <div class="summary-title">
+              <i class="fas fa-money-bill-wave text-blue-500 mr-2"></i>基本工資
+            </div>
+            <div id="basicSalary" class="summary-value">HK$ -</div>
+            <div class="summary-description">日薪 × 上班日數</div>
+          </div>
+
+          <div class="summary-card">
+            <div class="summary-title">
+              <i class="fas fa-fire text-orange-500 mr-2"></i>加班工資
+            </div>
+            <div id="otSalary" class="summary-value">HK$ -</div>
+            <div class="summary-description">加班時薪 × 加班小時</div>
+          </div>
+
+          <div class="summary-card total-card">
+            <div class="summary-title">
+              <i class="fas fa-coins text-yellow-500 mr-2"></i>總工資
+            </div>
+            <div id="totalSalary" class="summary-value total-value">HK$ -</div>
+            <div class="summary-description">基本工資 + 加班工資</div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 页脚区域 -->
+      <footer class="mt-8 mb-6 text-center text-gray-500 text-sm pt-4 border-t border-gray-200">
+        <p>© 2025 薪金計算器 版權所有 | 設計與開發：Michael</p>
+        <div class="footer-links">
+          <a href="#" id="designTeam" class="footer-link">
+            <i class="fas fa-users"></i>設計團隊
+          </a>
+          <a href="https://wa.me/85255486907" class="footer-link">
+            <i class="fab fa-whatsapp"></i>聯繫我們
+          </a>
+        </div>
+      </footer>
+    </div>
+  </div>
+
+  <!-- 设计师动画 -->
+  <div class="overlay" id="overlay"></div>
+
+  <div class="designer-animation" id="designerAnimation">
+    <div class="close-btn" id="closeDesigner">
+      <i class="fas fa-times"></i>
+    </div>
+    <div class="designer-icon">
+      <i class="fas fa-user-tie"></i>
+    </div>
+    <div class="designer-name">Michael Chan</div>
+    <div class="designer-title">UI/UX設計師 & 前端開發</div>
+
+    <div class="designer-info">
+      <div class="info-item">
+        <i class="fas fa-briefcase"></i>
+        <div class="info-content">
+          <div class="info-label">專業領域</div>
+          <div class="info-value">UI/UX設計、前端開發、互動設計</div>
+        </div>
+      </div>
+
+      <div class="info-item">
+        <i class="fas fa-history"></i>
+        <div class="info-content">
+          <div class="info-label">經驗</div>
+          <div class="info-value">6年專業設計與開發經驗</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 通知容器 -->
+  <div id="notificationContainer"></div>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      const form = document.getElementById('salaryForm');
+      const resultSection = document.getElementById('resultSection');
+      const basicSalaryEl = document.getElementById('basicSalary');
+      const otSalaryEl = document.getElementById('otSalary');
+      const totalSalaryEl = document.getElementById('totalSalary');
+      const dailySalaryEl = document.getElementById('displayDailySalary');
+      const hourlySalaryEl = document.getElementById('hourlySalary');
+      const otMultiplierEl = document.getElementById('displayOtMultiplier');
+      const otHourlySalaryEl = document.getElementById('otHourlySalary');
+      const designTeamLink = document.getElementById('designTeam');
+      const designerAnimation = document.getElementById('designerAnimation');
+      const overlay = document.getElementById('overlay');
+      const closeDesigner = document.getElementById('closeDesigner');
+      const notificationContainer = document.getElementById('notificationContainer');
+
+      // 修复单选按钮样式切换
+      const radioOptions = document.querySelectorAll('.radio-option');
+      radioOptions.forEach(option => {
+        option.addEventListener('click', function() {
+          radioOptions.forEach(opt => opt.classList.remove('selected'));
+          this.classList.add('selected');
+          const radio = this.querySelector('input[type="radio"]');
+          radio.checked = true;
+        });
+      });
+
+      // 设计团队链接点击事件
+      designTeamLink.addEventListener('click', function(e) {
+        e.preventDefault();
+        designerAnimation.classList.add('active');
+        overlay.classList.add('active');
+      });
+
+      // 关闭设计师弹窗
+      closeDesigner.addEventListener('click', function() {
+        designerAnimation.classList.remove('active');
+        overlay.classList.remove('active');
+      });
+
+      // 点击遮罩层关闭
+      overlay.addEventListener('click', function() {
+        designerAnimation.classList.remove('active');
+        overlay.classList.remove('active');
+      });
+
+      // 计算按钮点击事件
+      form.addEventListener('submit', function(e) {
+        e.preventDefault();
+
+        // 获取输入值
+        const dailySalary = parseFloat(document.getElementById('dailySalary').value);
+        const days = parseFloat(document.getElementById('days').value);
+        const otHours = parseFloat(document.getElementById('otHours').value);
+        const otMultiplier = parseFloat(document.querySelector('input[name="otMultiplier"]:checked').value);
+
+        // 输入验证
+        if (isNaN(dailySalary) || dailySalary <= 0 ||
+            isNaN(days) || days < 0 ||
+            isNaN(otHours) || otHours < 0) {
+          showNotification('請輸入有效的數值（日薪需大於0，日數和加班小時不為負數）', 'error');
+          return;
+        }
+
+        // 计算时薪和加班时薪
+        const hourlySalary = dailySalary / 8;
+        const otHourlySalary = hourlySalary * otMultiplier;
+
+        // 计算工资 - 保留完整计算结果（不四舍五入）
+        const basicSalary = days * dailySalary;
+        const otSalary = otHours * otHourlySalary;
+        const totalSalary = basicSalary + otSalary;
+
+        // 显示结果（带千分位分隔符），最多显示5位小数
+        const formatCurrency = (num) => {
+          // 尝试将数字转换为字符串
+          const numStr = num.toString();
+
+          // 检查是否为整数
+          if (numStr.indexOf('.') === -1) {
+            return `HK$ ${numStr.replace(/\B(?=(\d{3})+(?!\d))/g, ",")}`;
+          }
+
+          // 分割整数和小数部分
+          const [integerPart, decimalPart] = numStr.split('.');
+
+          // 格式化整数部分（添加千分位分隔符）
+          const formattedInteger = integerPart.replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+
+          // 处理小数部分（最多5位）
+          let formattedDecimal = decimalPart;
+          if (formattedDecimal.length > 5) {
+            formattedDecimal = decimalPart.substring(0, 5);
+          }
+
+          // 移除小数部分末尾的0
+          while (formattedDecimal.endsWith('0')) {
+            formattedDecimal = formattedDecimal.slice(0, -1);
+          }
+
+          // 如果小数部分为空，则只显示整数部分
+          if (formattedDecimal === '') {
+            return `HK$ ${formattedInteger}`;
+          }
+
+          return `HK$ ${formattedInteger}.${formattedDecimal}`;
+        };
+
+        dailySalaryEl.textContent = formatCurrency(dailySalary);
+        hourlySalaryEl.textContent = formatCurrency(hourlySalary);
+        otMultiplierEl.textContent = `×${otMultiplier}`;
+        otHourlySalaryEl.textContent = formatCurrency(otHourlySalary);
+        basicSalaryEl.textContent = formatCurrency(basicSalary);
+        otSalaryEl.textContent = formatCurrency(otSalary);
+        totalSalaryEl.textContent = formatCurrency(totalSalary);
+
+        // 显示结果区域
+        resultSection.classList.remove('hidden');
+        resultSection.classList.add('animate-fadeIn');
+
+        // 滚动到结果区域（添加70px偏移量解决顶部遮挡问题）
+        window.scrollTo({
+          top: resultSection.offsetTop - 70,
+          behavior: 'smooth'
+        });
+
+        // 显示成功通知
+        showNotification('計算成功！', 'success');
+      });
+
+      // 通知函数
+      function showNotification(message, type) {
+        const notification = document.createElement('div');
+        notification.className = `notification ${type}`;
+
+        const iconClass = type === 'success' ? 'fa-check-circle' : 'fa-exclamation-circle';
+        notification.innerHTML = `
+          <i class="fas ${iconClass}"></i>
+          <span>${message}</span>
+        `;
+
+        notificationContainer.appendChild(notification);
+
+        // 显示通知
+        setTimeout(() => {
+          notification.classList.add('show');
+        }, 10);
+
+        // 3秒后移除
+        setTimeout(() => {
+          notification.classList.remove('show');
+          setTimeout(() => {
+            notification.remove();
+          }, 300);
+        }, 3000);
+      }
+    });
+  </script>
+</body>
+</html>
